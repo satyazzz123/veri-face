@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ImageStatus {
+  SELECTED
+  UPLOADING
+  UPLOADED
+  PROCESSING
+  ACCEPTED
+  REJECTED
+  FAILED
+}
+
+enum DetectedFormat {
+  JPEG
+  PNG
+  HEIC
+  HEIF
+  UNKNOWN
+}
+
+model Image {
+  id                  String             @id @default(uuid())
+  originalFilename    String
+  storedFilename      String
+  originalMimeType    String
+  detectedFormat      DetectedFormat     @default(UNKNOWN)
+  fileSize            Int
+  width               Int?
+  height              Int?
+  originalStorageKey  String
+  processedStorageKey String?
+  status              ImageStatus        @default(PROCESSING)
+  rejectionReasons    String[]           @default([])
+  blurScore           Float?
+  faceCount           Int?
+  faceBoundingBoxes   Json?
+  perceptualHash      String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  processedAt         DateTime?
+  deletedAt           DateTime?
+
+  validationResults   ValidationResultRecord[]
+  processingAttempts  ProcessingAttempt[]
+
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([perceptualHash])
+  @@index([deletedAt])
+  @@index([originalFilename])
+  @@map("images")
+}
+
+model ValidationResultRecord {
+  id        String   @id @default(uuid())
+  imageId   String
+  rule      String
+  passed    Boolean
+  reason    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@index([rule])
+  @@map("validation_results")
+}
+
+model ProcessingAttempt {
+  id            String   @id @default(uuid())
+  imageId       String
+  attemptNumber Int
+  status        String
+  error         String?
+  durationMs    Int?
+  createdAt     DateTime @default(now())
+
+  image         Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@index([imageId])
+  @@map("processing_attempts")
+}

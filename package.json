@@ -1,0 +1,36 @@
+{
+  "name": "image-val-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-grade image upload and validation platform monorepo",
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "pnpm --filter @image-val/database db:migrate",
+    "api:dev": "pnpm --filter @image-val/api dev",
+    "worker:dev": "pnpm --filter @image-val/api worker:dev",
+    "web:dev": "pnpm --filter @image-val/web dev",
+    "clean": "turbo run clean && rimraf node_modules"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "esbuild",
+      "onnxruntime-node",
+      "prisma",
+      "sharp"
+    ]
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2"
+  }
+}
